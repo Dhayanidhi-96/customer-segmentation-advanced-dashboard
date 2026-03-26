@@ -1,79 +1,137 @@
 # Customer Segmentation Platform
 
-Full-stack, real-time customer segmentation system for e-commerce using React + FastAPI + PostgreSQL + Celery + ML clustering + Grok AI.
+Production-style customer analytics platform for segmentation, model comparison, campaign triggering, and AI-assisted recommendations.
+
+## What This Project Includes
+- Interactive dashboard built with React and Recharts
+- FastAPI backend with modular routers and services
+- PostgreSQL data model for customers, orders, segments, campaigns, and model runs
+- ML pipeline with multiple clustering strategies and automatic best-model selection
+- Celery worker and beat for asynchronous jobs and scheduled retraining
+- AI advisor endpoints for campaign and segment recommendations
 
 ## Tech Stack
-- Frontend: React 18, Vite, Tailwind CSS, Recharts, Axios, React Query
-- Backend: FastAPI, SQLAlchemy ORM, Alembic, Celery
-- Data: PostgreSQL 15, Redis
-- ML: scikit-learn, pandas, numpy, joblib, mlflow
-- AI: Grok (xAI) via OpenAI-compatible SDK
-- Delivery: Docker Compose + Nginx
+- Frontend: React 18, Vite, Tailwind CSS, React Query, Axios, Recharts
+- Backend: FastAPI, SQLAlchemy, Alembic, Pydantic
+- Data and Queue: PostgreSQL, Redis, Celery
+- ML: scikit-learn, pandas, numpy, joblib
+- Infra: Docker Compose, Nginx
 
-## Quick Start (Docker)
-1. Copy environment file:
-   - `cp .env.example .env`
-2. Start everything:
-   - `docker compose up --build`
-3. Open:
-   - `http://localhost`
+## Project Structure
+- backend: API, database models, ML pipeline, async tasks
+- frontend: React application with pages, hooks, charts, and API clients
+- report: project documentation and chapter-wise report files
+- docker-compose.yml: complete container stack for local deployment
 
-## Quick Start (Local with uv virtual environment)
-1. Backend env and deps:
-   - `cd backend`
-   - `uv venv`
-   - Windows CMD: `.venv\\Scripts\\activate`
-   - `uv pip install -r requirements.txt`
-2. Frontend deps:
-   - `cd ../frontend`
-   - `npm install`
-3. Start PostgreSQL + Redis (Docker only):
-   - `cd ..`
-   - `docker compose up postgres redis -d`
-4. Run API:
-   - `cd backend`
-   - `uv run uvicorn main:app --reload --host 0.0.0.0 --port 8000`
-5. Run worker + beat:
-   - `uv run celery -A tasks.celery_app worker --loglevel=info`
-   - `uv run celery -A tasks.celery_app beat --loglevel=info`
-6. Run frontend:
-   - `cd ../frontend`
-   - `npm run dev -- --host`
+## Prerequisites
+- Python 3.11+
+- Node.js 18+
+- npm 9+
+- uv
+- Docker Desktop (recommended for PostgreSQL and Redis)
 
-## Seed Data
-- Generates 500 customers and realistic order patterns (2-year span).
-- Trains all clustering models and picks the best model automatically.
+## Local Setup (Recommended)
+1. Clone repository and move into project root.
+2. Copy environment template.
 
-Command:
-- `cd backend`
-- `uv run python database/seed.py`
+```bash
+cp .env.example .env
+```
 
-## API Endpoints
-- `GET /api/health`
-- `POST /api/customers/segment`
-- `GET /api/customers`
-- `GET /api/customers/{id}`
-- `GET /api/segments/summary`
-- `GET /api/analytics/dashboard`
-- `GET /api/analytics/rfm-heatmap`
-- `GET /api/analytics/cluster-scatter`
-- `GET /api/analytics/revenue-by-segment`
-- `GET /api/analytics/retention-cohort`
-- `GET /api/models/list`
-- `GET /api/models/best`
-- `POST /api/models/retrain`
-- `POST /api/emails/trigger/{campaign_type}`
-- `GET /api/emails/campaigns`
-- `POST /api/ai/chat`
-- `GET /api/ai/recommendations`
+3. Start database and Redis.
 
-## Implementation Notes
-- Model artifacts saved under `backend/ml/artifacts/`.
-- Best model persisted as `best_model.pkl`.
-- Email sending logs persisted before send attempts.
-- Celery tasks are idempotent and safe to retry.
+```bash
+docker compose up -d postgres redis
+```
 
-## Next Improvements
-- Add authenticated admin login.
-- Add websocket stream for live campaign/task status.
-- Add pytest test suite + CI pipeline.
+4. Install backend dependencies.
+
+```bash
+cd backend
+uv venv
+uv pip install -r requirements.txt
+```
+
+5. Install frontend dependencies.
+
+```bash
+cd ../frontend
+npm install
+```
+
+## Run the Application (Local)
+Open separate terminals.
+
+1. Backend API
+
+```bash
+cd backend
+uv run uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
+
+2. Celery Worker
+
+```bash
+cd backend
+uv run celery -A tasks.celery_app worker --loglevel=info
+```
+
+3. Celery Beat
+
+```bash
+cd backend
+uv run celery -A tasks.celery_app beat --loglevel=info
+```
+
+4. Frontend
+
+```bash
+cd frontend
+npm run dev -- --host
+```
+
+## Seed Data and Train Models
+Default seed and training:
+
+```bash
+cd backend
+uv run python database/seed.py
+```
+
+Large dataset example:
+
+```bash
+cd backend
+uv run python database/seed.py --customers 2.5lakh --force
+```
+
+## Docker Full Stack
+
+```bash
+docker compose up --build
+```
+
+Application entry points:
+- Frontend: http://localhost
+- API docs: http://localhost:8000/docs
+
+## Key API Routes
+- GET /api/health
+- GET /api/customers
+- GET /api/segments/summary
+- GET /api/analytics/dashboard
+- GET /api/models/list
+- POST /api/models/retrain
+- POST /api/emails/trigger/{campaign_type}
+- POST /api/ai/chat
+
+## Screenshots
+Screenshots will be added in a later update.
+
+## Notes
+- Best model artifacts are stored in backend/ml/artifacts.
+- Seed script supports scaled synthetic generation for stress testing.
+- Analytics endpoints include sampling and query optimizations for better frontend responsiveness.
+
+## License
+For academic and learning use. Add a formal license file if needed for distribution.
